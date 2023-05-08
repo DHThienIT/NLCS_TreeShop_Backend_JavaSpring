@@ -13,39 +13,38 @@ import javax.persistence.OneToMany;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class City {
+public class CountryAndDistrict {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cityId;
+    private Long countryAndDistrictId;
 
     private String name;
 
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ward", orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 
-    public City() {
-		super();
-	}
-    
-	public City(String name) {
-		super();
-		this.name = name;
+    public CountryAndDistrict() {
+    	super();
+    }
+
+    public CountryAndDistrict(String name) {
+    	super();
+        this.name = name;
+    }
+
+	public Long getCountryAndDistrictId() {
+		return countryAndDistrictId;
 	}
 
-	public Long getCityId() {
-		return cityId;
-	}
-
-	public void setCityId(Long cityId) {
-		this.cityId = cityId;
+	public void setCountryAndDistrictId(Long countryAndDistrictId) {
+		this.countryAndDistrictId = countryAndDistrictId;
 	}
 
 	public String getName() {
-		return name;
-	}
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 }

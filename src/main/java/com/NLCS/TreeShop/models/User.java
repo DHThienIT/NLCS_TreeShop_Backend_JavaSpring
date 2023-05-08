@@ -22,12 +22,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
-@Table(name = "user", uniqueConstraints = { 
-		@UniqueConstraint(columnNames = "firstname"),
-		@UniqueConstraint(columnNames = "lastname"), 
-		@UniqueConstraint(columnNames = "username"),
-		@UniqueConstraint(columnNames = "email") })
+@Table(name = "user", uniqueConstraints = { @UniqueConstraint(columnNames = "username"),
+		@UniqueConstraint(columnNames = "email") }) // username, email là 2 cột có giá trị 0 được trùng lặp
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,39 +46,54 @@ public class User {
 	private String email;
 
 	@NotBlank
+	@Size(max = 13)
+	private String phone;
+
+	@NotBlank
 	@Size(max = 20)
 	private String username;
 
+	@JsonIgnore
 	@NotBlank
 	@Size(max = 120)
 	private String password;
 
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
 
 	private String userPhoto;
 
+	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
 	private List<Address> addresses = new ArrayList<>();
-	
+
+	@JsonIgnore
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "user_trackingListTree", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "favoriteTree_id"))
+	private List<Tree> trackingListTree = new ArrayList<>();
+
 	@NotNull
+	@JsonIgnore
 	private boolean status;
 
 	public User() {
 	}
 
 	public User(@NotBlank @Size(min = 2, max = 10) String firstname, @NotBlank @Size(min = 2, max = 10) String lastname,
-			@NotBlank @Size(max = 50) @Email String email, @NotBlank @Size(max = 20) String username,
-			@NotBlank @Size(max = 120) String password) {
+			@NotBlank @Size(max = 50) @Email String email, @NotBlank @Size(max = 13) String phone, @NotBlank @Size(max = 20) String username,
+			@NotBlank @Size(max = 120) String password, List<Tree> trackingListTree) {
 		super();
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.email = email;
+		this.phone = phone;
 		this.username = username;
 		this.password = password;
 		this.userPhoto = "img.jpg";
 		this.status = true;
+		this.trackingListTree = trackingListTree;
 	}
 
 	public Long getUserId() {
@@ -122,6 +136,14 @@ public class User {
 		this.email = email;
 	}
 
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
 	public String getPassword() {
 		return password;
 	}
@@ -152,6 +174,14 @@ public class User {
 
 	public void setAddresses(List<Address> addresses) {
 		this.addresses = addresses;
+	}
+
+	public List<Tree> getTrackingListTree() {
+		return trackingListTree;
+	}
+
+	public void setTrackingListTree(List<Tree> trackingListTree) {
+		this.trackingListTree = trackingListTree;
 	}
 
 	public boolean isStatus() {

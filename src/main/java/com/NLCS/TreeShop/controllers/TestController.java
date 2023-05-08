@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.NLCS.TreeShop.models.Tree;
 import com.NLCS.TreeShop.repository.TreeRepository;
-import com.NLCS.TreeShop.security.jwt.JwtUtils;
-import com.NLCS.TreeShop.security.services.UserDetailsServiceImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -23,13 +21,15 @@ public class TestController {
 	private TreeRepository treeRepository;
 	
 	@GetMapping("/all")
-	public ResponseEntity<?> getAllTrees() {
+	public ResponseEntity<?> getAllTrees() throws Exception {
 		List<Tree> trees = treeRepository.findAll();
 		return ResponseEntity.ok(trees);
+//		EmailSender.sendEmail("thienb1910452@student.ctu.edu.vn", "Java Example Test", "Hello Admin");
+//		return null;
 	}
 
 	@GetMapping("/normal_read")
-	@PreAuthorize("hasRole('normal_read')")
+	@PreAuthorize("hasRole('USER_NORMAL_ACCESS')")
 	public String userAccess() {
 		return "normal_read.";
 	}
@@ -41,7 +41,7 @@ public class TestController {
 	}
 
 	@GetMapping("/crud_admin")
-	@PreAuthorize("hasRole('crud_admin')")
+	@PreAuthorize("hasRole('CRUD_ALLOW_ALL')")
 	public String adminAccess() {
 		return "crud_admin.";
 	}

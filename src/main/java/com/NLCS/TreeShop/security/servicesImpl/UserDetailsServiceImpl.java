@@ -1,4 +1,4 @@
-package com.NLCS.TreeShop.security.services;
+package com.NLCS.TreeShop.security.servicesImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.NLCS.TreeShop.models.User;
 import com.NLCS.TreeShop.repository.UserRepository;
+import com.NLCS.TreeShop.security.services.UserDetailsImpl;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -23,5 +24,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     return UserDetailsImpl.build(user);
   }
-
 }

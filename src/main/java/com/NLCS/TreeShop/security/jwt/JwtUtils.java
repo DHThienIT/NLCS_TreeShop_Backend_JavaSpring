@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 import com.NLCS.TreeShop.security.services.UserDetailsImpl;
@@ -30,13 +31,23 @@ public class JwtUtils {
 	@Value("${bezkoder.app.jwtCookieName}")
 	private String jwtCookie;
 
-	public String getJwtFromCookies(HttpServletRequest request) {
-		Cookie cookie = WebUtils.getCookie(request, jwtCookie);
-		if (cookie != null) {
-			return cookie.getValue();
-		} else {
-			return null;
+	// Lấy ra jwt từ cookie được gửi từ Client xuống Server
+//	public String getJwtFromCookies(HttpServletRequest request) {
+//		Cookie cookie = WebUtils.getCookie(request, jwtCookie);
+//		if (cookie != null) {
+//			return cookie.getValue();
+//		} else {
+//			return null;
+//		}
+//	}
+
+	// Lấy ra jwt từ headers gán (Bearer + jwt) được gửi từ Client xuống Server
+	public String getTokenFromRequestHeaderBearer(HttpServletRequest request) {
+		String bearerToken = request.getHeader("Authorization");
+		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+			return bearerToken.substring(7);
 		}
+		return null;
 	}
 
 	public String generateJwtToken(Authentication authentication) {

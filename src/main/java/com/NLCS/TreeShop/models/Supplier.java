@@ -27,7 +27,10 @@ public class Supplier {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "supplier", orphanRemoval = true)
 	private List<Tree> trees = new ArrayList<>();
 	
+	private Long address_id;
+	
 	@NotNull
+	@JsonIgnore
 	private boolean status;
 	
 	public Supplier() {
@@ -52,6 +55,14 @@ public class Supplier {
 		return supplierName;
 	}
 
+	public Long getAddress_id() {
+		return address_id;
+	}
+
+	public void setAddress_id(Long address_id) {
+		this.address_id = address_id;
+	}
+
 	public void setSupplierName(String supplierName) {
 		this.supplierName = supplierName;
 	}
@@ -71,13 +82,4 @@ public class Supplier {
 	public void setStatus(boolean status) {
 		this.status = status;
 	}
-
-//	public Address getAddress() {
-//		return address;
-//	}
-//
-//	public void setAddress(Address address) {
-//		this.address = address;
-//	}
-	
 }

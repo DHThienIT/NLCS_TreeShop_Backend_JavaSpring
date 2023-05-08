@@ -7,12 +7,15 @@ import com.NLCS.TreeShop.models.CartItem;
 import com.NLCS.TreeShop.models.Tree;
 
 public class CarItemResponse {
-	@Autowired CartItem items;
-	@Autowired Tree products;
+	@Autowired
+	CartItem items;
+	@Autowired
+	Tree products;
+	
 	public Errors errors;
 	public String message;
-	
-	public CarItemResponse(CartItem items,Tree products, Errors errors, String message) {
+
+	public CarItemResponse(CartItem items, Tree products, Errors errors, String message) {
 		super();
 		this.items = items;
 		this.products = products;
@@ -52,6 +55,4 @@ public class CarItemResponse {
 		this.products = products;
 	}
 
-	
-	
 }

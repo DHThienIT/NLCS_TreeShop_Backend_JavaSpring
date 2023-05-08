@@ -19,12 +19,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.NLCS.TreeShop.security.jwt.AuthEntryPointJwt;
 import com.NLCS.TreeShop.security.jwt.AuthTokenFilter;
-import com.NLCS.TreeShop.security.services.UserDetailsServiceImpl;
+import com.NLCS.TreeShop.security.servicesImpl.UserDetailsServiceImpl;
 
 @Configuration
 @EnableGlobalMethodSecurity(
-		// securedEnabled = true,
-		// jsr250Enabled = true,
 		prePostEnabled = true)
 public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 	@Autowired
@@ -84,6 +82,16 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 	// http.addFilterBefore(authenticationJwtTokenFilter(),
 	// UsernamePasswordAuthenticationFilter.class);
 	// }
+	
+//	@Override
+//	  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//	    // Cấu hình xác thực bằng tài khoản trong database hoặc từ một nguồn nào đó
+//	    auth.jdbcAuthentication()
+//	      .dataSource(dataSource)
+//	      .passwordEncoder(passwordEncoder())
+//	      .usersByUsernameQuery("SELECT username, password, enabled FROM users WHERE username=?")
+//	      .authoritiesByUsernameQuery("SELECT username, authority FROM authorities WHERE username=?");
+//	  }
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -105,6 +113,8 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 				.antMatchers("/api/category/**").permitAll()
 				.antMatchers("/api/payment/**").permitAll()
 				.antMatchers("/api/supplier/**").permitAll()
+				.antMatchers("/api/promotion/**").permitAll()
+				.antMatchers("/api/deliveryMethod/**").permitAll()
 		.anyRequest().authenticated();
 
 		http.authenticationProvider(authenticationProvider());

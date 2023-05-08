@@ -1,4 +1,4 @@
-package com.NLCS.TreeShop.security.services;
+package com.NLCS.TreeShop.security.servicesImpl;
 
 import java.util.List;
 
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.NLCS.TreeShop.models.Supplier;
 import com.NLCS.TreeShop.payload.request.SupplierRequest;
 import com.NLCS.TreeShop.repository.SupplierRepository;
+import com.NLCS.TreeShop.security.services.SupplierService;
 
 @Service
 public class SupplierServiceImpl implements SupplierService {

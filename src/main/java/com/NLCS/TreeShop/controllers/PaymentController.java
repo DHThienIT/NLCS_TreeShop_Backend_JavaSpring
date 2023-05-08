@@ -16,8 +16,11 @@ import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +31,25 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.NLCS.TreeShop.config.PaypalPaymentIntent;
+import com.NLCS.TreeShop.config.PaypalPaymentMethod;
 import com.NLCS.TreeShop.config.VnpayConfig;
+import com.NLCS.TreeShop.models.EPaymentMethod;
 import com.NLCS.TreeShop.models.Invoice;
 import com.NLCS.TreeShop.payload.request.PaymentRequest;
+import com.NLCS.TreeShop.payload.response.MessageResponse;
 import com.NLCS.TreeShop.repository.InvoiceRepository;
 import com.NLCS.TreeShop.security.services.InvoiceService;
+import com.NLCS.TreeShop.security.services.PaypalService;
+import com.NLCS.TreeShop.utils.Utils;
+import com.paypal.api.payments.Links;
+import com.paypal.api.payments.Payment;
+import com.paypal.base.rest.PayPalRESTException;
 
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
@@ -44,18 +57,30 @@ public class PaymentController {
 	InvoiceRepository invoiceRepository;
 	@Autowired
 	InvoiceService invoiceService;
-	
+
+	private Logger log = LoggerFactory.getLogger(getClass());
+
+	@Autowired
+	private PaypalService paypalService;
+
+	@GetMapping("/getAllPaymentMethod")
+	public ResponseEntity<?> getAllPaymentMethod() {
+		EPaymentMethod[] paymentMethods = EPaymentMethod.values();
+		return ResponseEntity.ok(paymentMethods);
+	}
+
 	Invoice invoice0 = new Invoice();
 	Long userId0 = 0L;
 
 	@PostMapping("/pay/{invoiceId}")
 	@PreAuthorize("hasRole('PAYMENT_NORMAL_ACCESS')")
-	public String pay(HttpServletRequest req, @PathVariable("invoiceId") Long invoiceId, @Valid @RequestBody PaymentRequest paymentRequest)
-			throws ServletException, IOException {
+	public ResponseEntity<?> pay(HttpServletRequest req, @PathVariable("invoiceId") Long invoiceId,
+			@Valid @RequestBody PaymentRequest paymentRequest) throws ServletException, IOException {
 
 		Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
-		invoice0 = invoice;	userId0 = paymentRequest.getUser_id();
-		
+		invoice0 = invoice;
+		userId0 = paymentRequest.getUser_id();
+
 		if (paymentRequest.getPaymentMethod().equals("VnPay")) {
 			String vnp_Version = "2.1.0";
 			String vnp_Command = "pay";
@@ -126,21 +151,75 @@ public class PaymentController {
 			queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
 			String paymentUrl = VnpayConfig.vnp_PayUrl + "?" + queryUrl;
 
-			invoice0.setPaymentMethod("VnPay");
+			invoice0.setPaymentMethod(paymentRequest.getPaymentMethod());
 			System.out.println(paymentUrl);
-			
-// => trả ra đường dẫn đưa đi thanh toán Vnpay
-			return paymentUrl;
+
+			return ResponseEntity.ok(new MessageResponse("Success", paymentUrl));
+		} else if (paymentRequest.getPaymentMethod().equals("Paypal")) {
+			String cancelUrl = Utils.getBaseURL(req) + "/api/payment/paypalError";
+			String successUrl = Utils.getBaseURL(req) + "/api/payment/paypalSuccess";
+			Double USD = 23465.0;
+
+			try {
+				Payment payment = paypalService.createPayment(invoice.getTotalPrice() / USD, "USD",
+						PaypalPaymentMethod.paypal, PaypalPaymentIntent.sale, "payment description 123456", cancelUrl,
+						successUrl);
+				for (Links links : payment.getLinks()) {
+					if (links.getRel().equals("approval_url")) {
+						return ResponseEntity.ok(new MessageResponse("Success", links.getHref()));
+					}
+				}
+			} catch (PayPalRESTException e) {
+				log.error(e.getMessage());
+			}
+
+			return ResponseEntity.ok(new MessageResponse("PayPaypalSuccess", "Thanh toán thành công!"));
+		} else if (paymentRequest.getPaymentMethod().equals("PayDirect")) {
+			invoiceService.setPaymentSuccess(invoice, paymentRequest.getPaymentMethod(), paymentRequest.getUser_id());
+			return ResponseEntity.ok(new MessageResponse("PayDirectSuccess", "Thanh toán thành công!"));
+		} else {
+			return ResponseEntity.ok(new MessageResponse("Error", "Tìm không thấy phương thức thanh toán đã đưa vào!"));
 		}
-		else {
-// => trả ra đường dẫn trả về lỗi tại đây
-			return "Tìm không thấy phương thức thanh toán đã đưa vào!";
+	}
+
+	@GetMapping("/paypalError")
+	public void cancelPay(HttpServletResponse response) throws IOException {
+		String redirectUrlIfError = "http://localhost:8081/paymentResultNotificationError";
+		response.sendRedirect(redirectUrlIfError);
+	}
+
+	@GetMapping("/paypalSuccess")
+	public void successPay(@RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId,
+			HttpServletResponse response) throws ServletException, IOException {
+		String redirectUrlData = "http://localhost:8081/data";
+		String redirectUrlIfSuccess = "http://localhost:8081/paymentResultNotificationSuccessPayPaypal";
+		String redirectUrlIfError = "http://localhost:8081/paymentResultNotificationError";
+		try {
+			Payment payment = paypalService.executePayment(paymentId, payerId);
+			if (payment.getState().equals("approved")) {
+				System.out.println("xxxxxxxxxxxxxxxxxxxx");
+				Invoice invoice = invoiceRepository.findById(invoice0.getInvoiceId()).orElseThrow();
+				try {
+					invoiceService.setPaymentSuccess(invoice, "Paypal", userId0);
+					response.sendRedirect(redirectUrlIfSuccess);
+				} catch (Exception e) {
+					response.sendRedirect(redirectUrlIfError);
+				}
+			}
+		} catch (PayPalRESTException e) {
+			response.sendRedirect(redirectUrlIfError);
+			log.error(e.getMessage());
 		}
 	}
 
 	@GetMapping("/returnFromVnpay")
-	public ResponseEntity<Invoice> returnFromVnpay(HttpServletRequest request) throws ServletException, IOException {
+	public ResponseEntity<Invoice> returnFromVnpay(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		System.out.println("Đã vào đây thành công!");
+
+		String redirectUrlIfError = "http://localhost:8081/paymentResultNotificationError";
+		String redirectUrlIfSuccess = "http://localhost:8081/paymentResultNotificationSuccessPayVnpay";
+
 		try {
 			Map fields = new HashMap();
 			for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
@@ -179,17 +258,19 @@ public class PaymentController {
 								Invoice invoice = invoiceRepository.findById(invoice0.getInvoiceId()).orElseThrow();
 								try {
 									invoiceService.setPaymentSuccess(invoice, invoice0.getPaymentMethod(), userId0);
-									return new ResponseEntity<>(invoice, HttpStatus.OK);
+									response.sendRedirect(redirectUrlIfSuccess);
+									return new ResponseEntity<>(null, HttpStatus.OK);
 								} catch (Exception e) {
-									// TODO: handle exception
+									response.sendRedirect(redirectUrlIfError);
 									return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 								}
-
 							} else {
 //	=> giao dịch thất bại
 								System.out.println("Đã vào 2, giao dịch thất bại!");
 								// Here Code update PaymnentStatus = 2 into your Database
 								System.out.println("Tại chỗ này gán lệnh trả về trang giao dịch thất bại!");
+								response.sendRedirect(redirectUrlIfError);
+								return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 							}
 						} else {
 
@@ -207,7 +288,7 @@ public class PaymentController {
 		} catch (Exception e) {
 			System.out.print("{\"RspCode\":\"99\",\"Message\":\"Unknow error\"}");
 		}
-
+		response.sendRedirect(redirectUrlIfError);
 		return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

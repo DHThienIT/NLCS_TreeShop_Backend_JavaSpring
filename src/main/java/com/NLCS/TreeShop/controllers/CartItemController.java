@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/cart")
 public class CartItemController {
@@ -38,6 +38,7 @@ public class CartItemController {
 			List<CartItem> cartItems = cartService.getCart(userId);
 			return new ResponseEntity<>(cartItems, HttpStatus.OK);
 		} catch (Exception e) {
+			System.out.println("đã vào CARTITEM");
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -45,6 +46,7 @@ public class CartItemController {
 	@PostMapping(value = "/", consumes = { "*/*" })
 	@PreAuthorize("hasRole('CARTITEM_NORMAL_ACCESS')")
 	public ResponseEntity<?> createCart(@Valid @RequestBody CartRequest cartRequest) {
+		System.out.println("x123x");
 		return new ResponseEntity<>(cartService.createCart(cartRequest), HttpStatus.CREATED);
 	}
 	

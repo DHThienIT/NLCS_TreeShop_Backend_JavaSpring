@@ -1,4 +1,4 @@
-package com.NLCS.TreeShop.security.services;
+package com.NLCS.TreeShop.security.servicesImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +19,8 @@ import com.NLCS.TreeShop.repository.CartItemRepository;
 import com.NLCS.TreeShop.repository.InvoiceRepository;
 import com.NLCS.TreeShop.repository.TreeRepository;
 import com.NLCS.TreeShop.repository.UserRepository;
+import com.NLCS.TreeShop.security.services.CartItemService;
+import com.NLCS.TreeShop.security.services.InvoiceService;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
@@ -35,36 +37,54 @@ public class InvoiceServiceImpl implements InvoiceService {
 	@Autowired
 	TreeRepository treeRepository;
 
-	double totalPrice = 0;
-
 	@Override
 	public Invoice creatInvoice(InvoiceRequest invoiceRequest) {
+		double totalPrice = 0;
 		Invoice invoice0 = invoiceRepository.findByUser_UserIdAndWasPay(invoiceRequest.getUser_id(), false);
-		if(invoice0!=null) return invoice0;
+		User user = userRepository.findById(invoiceRequest.getUser_id()).orElseThrow();
+		Address address = addressRepository.findById(invoiceRequest.getAddress_id()).orElseThrow();
 		
 		List<CartItem> cartItems = cartItemService.getCart(invoiceRequest.getUser_id());
 		
-		if(cartItems.isEmpty()) throw new InvalidConfigurationPropertyValueException("Giỏ hàng", cartItems, "Giỏ hàng hiện đang rỗng!");
+		Double shipmentFee = invoiceRequest.getShipmentFee();
+		Double promotionPrice = invoiceRequest.getPromotionPrice();
+		if(shipmentFee.toString().isBlank()) shipmentFee=0.0;
+		if(promotionPrice.toString().isBlank()) promotionPrice=0.0;
 		
-		User user = userRepository.findById(invoiceRequest.getUser_id()).orElseThrow();
-		Address address = addressRepository.findById(invoiceRequest.getAddress_id()).orElseThrow();
-
 		for (CartItem cartItem : cartItems) {
 			totalPrice += cartItem.getQuantity() * cartItem.getTree().getPrice();
 		}
+		totalPrice = totalPrice + shipmentFee + promotionPrice;
 		
-		Invoice invoice = new Invoice(user, "", "", totalPrice, false, cartItems, address);
-		//timeCreate & paymentMethod gán "" vì chưa thanh toán thành công nên chưa thể tạo.
+		if(cartItems.isEmpty()) throw new InvalidConfigurationPropertyValueException("Giỏ hàng", cartItems, "Giỏ hàng hiện đang rỗng!");
 		
-		invoiceRepository.save(invoice);
-		totalPrice = 0;
+		if(invoice0!=null) {
+			invoice0.setAddress(address);
+			invoice0.setTotalPrice(totalPrice);
+			invoice0.setPromotionPrice(promotionPrice);
+			invoice0.setShipmentFee(shipmentFee);
+			invoiceRepository.save(invoice0);
+			
+			for (CartItem cartItem : cartItems) {
+				cartItem.setInvoice(invoice0);
+				cartItemRepository.save(cartItem);
+			}
+			
+			return invoice0;
+		} else {
+			Invoice invoice = new Invoice(user, "", "", totalPrice, false, cartItems, address, shipmentFee, promotionPrice);
+			//timeCreate & paymentMethod gán "" vì chưa thanh toán thành công nên chưa thể tạo.
+			
+			invoiceRepository.save(invoice);
+			totalPrice = 0;
 
-		for (CartItem cartItem : cartItems) {
-			cartItem.setInvoice(invoice);
-			cartItemRepository.save(cartItem);
+			for (CartItem cartItem : cartItems) {
+				cartItem.setInvoice(invoice);
+				cartItemRepository.save(cartItem);
+			}
+
+			return invoice;
 		}
-
-		return invoice;
 	}
 
 	@Override
@@ -104,27 +124,6 @@ public class InvoiceServiceImpl implements InvoiceService {
 			invoiceRepository.deleteById(invoiceId);
 		} else
 			throw new InvalidConfigurationPropertyValueException("invoiceId", invoiceId, "Not Found");
-	}
-
-	@Override
-	public Optional<Invoice> updateProductsInInvoice(Invoice invoice, Long userId) {
-		List<CartItem> listCartItem = cartItemService.getCart(userId);
-
-		for (CartItem cartItem : listCartItem) {
-			cartItem.setInvoice(invoice);
-			totalPrice += cartItem.getQuantity() * cartItem.getTree().getPrice();
-			cartItemRepository.save(cartItem);
-		}
-		invoice.setTotalPrice(totalPrice);
-		totalPrice = 0;
-		return Optional.of(invoice);
-	}
-
-	@Override
-	public Optional<Invoice> updateAddressInInvoice(Invoice invoice, Address address) {
-		invoice.setAddress(address);
-		invoiceRepository.save(invoice);
-		return Optional.of(invoice);
 	}
 	
 	@Override

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.NLCS.TreeShop.models.Address;
+import com.NLCS.TreeShop.models.EPaymentMethod;
 import com.NLCS.TreeShop.models.Invoice;
 import com.NLCS.TreeShop.payload.request.InvoiceRequest;
 
@@ -25,12 +26,7 @@ public interface InvoiceService {
 
 	void hardDeleteInvoiceById(Long invoiceId);
 
-	Optional<Invoice> updateProductsInInvoice(Invoice invoice, Long userId);
-
-	Optional<Invoice> updateAddressInInvoice(Invoice invoice, Address address);
-
 	Optional<Invoice> setPaymentSuccess(Invoice invoice, String paymentMethod, Long userId);
 
 	Invoice invoiceReactivationById(Long invoiceId);
-
 }

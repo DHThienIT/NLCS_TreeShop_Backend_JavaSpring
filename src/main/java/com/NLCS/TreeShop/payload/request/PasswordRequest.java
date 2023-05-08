@@ -5,27 +5,24 @@ import javax.validation.constraints.Size;
 
 public class PasswordRequest {
 	@NotBlank
-	@Size(max = 120)
-	private String password;
+	private String oldPassword;
 
 	@NotBlank
-	@Size(max = 120)
-	private String checkPassword;
+	private String newPassword;
 
-	public String getPassword() {
-		return password;
+	public String getOldPassword() {
+		return oldPassword;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setOldPassword(String oldPassword) {
+		this.oldPassword = oldPassword;
 	}
 
-	public String getCheckPassword() {
-		return checkPassword;
+	public String getNewPassword() {
+		return newPassword;
 	}
 
-	public void setCheckPassword(String checkPassword) {
-		this.checkPassword = checkPassword;
+	public void setNewPassword(String newPassword) {
+		this.newPassword = newPassword;
 	}
-
 }

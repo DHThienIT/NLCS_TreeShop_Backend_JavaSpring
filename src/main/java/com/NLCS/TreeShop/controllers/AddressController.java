@@ -19,7 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.NLCS.TreeShop.models.Address;
+import com.NLCS.TreeShop.models.ProvinceAndCity;
+import com.NLCS.TreeShop.models.CountryAndDistrict;
+import com.NLCS.TreeShop.models.Ward;
 import com.NLCS.TreeShop.payload.request.AddressRequest;
+import com.NLCS.TreeShop.payload.request.SetDefaultAddressRequest;
 import com.NLCS.TreeShop.payload.response.MessageResponse;
 import com.NLCS.TreeShop.repository.AddressRepository;
 import com.NLCS.TreeShop.repository.CityRepository;
@@ -28,7 +32,7 @@ import com.NLCS.TreeShop.repository.WardRepository;
 import com.NLCS.TreeShop.security.services.AddressService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/address")
 public class AddressController {
 	@Autowired
@@ -71,14 +75,35 @@ public class AddressController {
 	@PreAuthorize("hasRole('ADDRESS_NORMAL_ACCESS')")
 	public ResponseEntity<?> createAddress(@Valid @RequestBody AddressRequest addressRequest) {
 		if (addressRequest.getUser_id() == null) {
-			return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Chưa nhập userId!"));
+			return ResponseEntity.badRequest().body(new MessageResponse("Error","Lỗi: Chưa nhập userId!"));
 		}
 
-		if (addressRepository.existsByAddress(addressRequest.getAddressName())) {
-			return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Tên địa chỉ này đã tồn tại!"));
+		if (addressRepository.existsBySpecificAddress(addressRequest.getSpecificAddress())) {
+			return ResponseEntity.ok(new MessageResponse("NotFound", "Tên địa chỉ này đã tồn tại!"));
 		}
 
 		return new ResponseEntity<>(addressService.createAddress(addressRequest), HttpStatus.CREATED);
+	}
+
+	@GetMapping("/provinceAndCity")
+	@PreAuthorize("hasRole('ADDRESS_NORMAL_ACCESS')")
+	public ResponseEntity<?> getAllProvinceAndCity() {
+		List<ProvinceAndCity> listCity = addressService.getAllProvinceAndCity();
+		return new ResponseEntity<>(listCity, HttpStatus.OK);
+	}
+	
+	@GetMapping("/countryAndDistrict")
+	@PreAuthorize("hasRole('ADDRESS_NORMAL_ACCESS')")
+	public ResponseEntity<?> getAllCountyAndDistrict() {
+		List<CountryAndDistrict> listCity = addressService.getAllCountyAndDistrict();
+		return new ResponseEntity<>(listCity, HttpStatus.OK);
+	}
+	
+	@GetMapping("/wards")
+	@PreAuthorize("hasRole('ADDRESS_NORMAL_ACCESS')")
+	public ResponseEntity<?> getAllWards() {
+		List<Ward> listCity = addressService.getAllWards();
+		return new ResponseEntity<>(listCity, HttpStatus.OK);
 	}
 
 	@PutMapping(value = "/{addressId}", consumes = { "*/*" })
@@ -86,6 +111,13 @@ public class AddressController {
 	public ResponseEntity<?> updateAddress(@PathVariable("addressId") Long addressId,
 			@RequestBody @Valid AddressRequest addressRequest) {
 		return new ResponseEntity<>(addressService.updateAddress(addressId, addressRequest), HttpStatus.CREATED);
+	}
+
+	@PutMapping(value = "/setDefaultAddress", consumes = { "*/*" })
+	@PreAuthorize("hasRole('ADDRESS_NORMAL_ACCESS')")
+	public ResponseEntity<?> setDefaultAddress(@RequestBody @Valid SetDefaultAddressRequest setDefaultAddressRequest) {
+		addressService.setDefaultAddress(setDefaultAddressRequest);
+		return ResponseEntity.ok(new MessageResponse("Đã thay đổi địa chỉ mặc định!"));
 	}
 
 	@DeleteMapping(value = "/{addressId}")

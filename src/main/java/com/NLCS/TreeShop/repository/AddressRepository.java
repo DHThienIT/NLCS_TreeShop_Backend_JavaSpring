@@ -12,7 +12,9 @@ import com.NLCS.TreeShop.models.Address;
 public interface AddressRepository extends JpaRepository<Address, Long> {
 	Optional<Address> findById(Long id);
 
-	boolean existsByAddress(String addressName);
+	boolean existsBySpecificAddress(String specificAddress);
 
 	List<Address> findByUser_UserIdAndStatus(Long userId, boolean status);
+
+	Address findByUser_UserIdAndSetDefault(Long user_id, boolean b);
 }

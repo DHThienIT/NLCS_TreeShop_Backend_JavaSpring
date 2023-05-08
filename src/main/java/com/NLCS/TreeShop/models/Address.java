@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Address {
 	@Id
@@ -20,25 +22,32 @@ public class Address {
 	private Long addressId;
 
 	@NotNull
-	private String address;
+	private String name;
+
+	@NotNull
+	private String specificAddress;
 
 	@NotNull
 	private String phone;
 
 	@NotNull
+	@JsonIgnore
 	private boolean status;
+
+	@NotNull
+	private boolean setDefault;
 
 	@JoinColumn(name = "ward_id")
 	@ManyToOne
 	private Ward ward;
 
-	@JoinColumn(name = "district_id")
+	@JoinColumn(name = "countryAndDistrict_id")
 	@ManyToOne
-	private District district;
+	private CountryAndDistrict countryAndDistrict;
 
-	@JoinColumn(name = "city_id")
+	@JoinColumn(name = "provinceAndCity_id")
 	@ManyToOne
-	private City city;
+	private ProvinceAndCity provinceAndCity;
 
 	@JoinColumn(name = "user_id")
 	@ManyToOne
@@ -50,15 +59,18 @@ public class Address {
 	public Address() {
 	}
 
-	public Address(@NotNull String address, @NotNull String phone, Ward ward, District district, City city, User user) {
+	public Address(@NotNull String name, @NotNull String specificAddress, @NotNull String phone, Ward ward,
+			CountryAndDistrict countryAndDistrict, ProvinceAndCity provinceAndCity, User user, boolean setDefault) {
 		super();
-		this.address = address;
+		this.name = name;
+		this.specificAddress = specificAddress;
 		this.phone = phone;
 		this.ward = ward;
-		this.district = district;
-		this.city = city;
+		this.countryAndDistrict = countryAndDistrict;
+		this.provinceAndCity = provinceAndCity;
 		this.user = user;
 		this.status = true;
+		this.setDefault = setDefault;
 	}
 
 	public Long getAddressId() {
@@ -69,12 +81,20 @@ public class Address {
 		this.addressId = addressId;
 	}
 
-	public String getAddress() {
-		return address;
+	public String getName() {
+		return name;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getSpecificAddress() {
+		return specificAddress;
+	}
+
+	public void setSpecificAddress(String specificAddress) {
+		this.specificAddress = specificAddress;
 	}
 
 	public String getPhone() {
@@ -93,20 +113,20 @@ public class Address {
 		this.ward = ward;
 	}
 
-	public District getDistrict() {
-		return district;
+	public CountryAndDistrict getCountryAndDistrict() {
+		return countryAndDistrict;
 	}
 
-	public void setDistrict(District district) {
-		this.district = district;
+	public void setCountryAndDistrict(CountryAndDistrict countryAndDistrict) {
+		this.countryAndDistrict = countryAndDistrict;
 	}
 
-	public City getCity() {
-		return city;
+	public ProvinceAndCity getProvinceAndCity() {
+		return provinceAndCity;
 	}
 
-	public void setCity(City city) {
-		this.city = city;
+	public void setProvinceAndCity(ProvinceAndCity provinceAndCity) {
+		this.provinceAndCity = provinceAndCity;
 	}
 
 	public boolean isStatus() {
@@ -115,6 +135,14 @@ public class Address {
 
 	public void setStatus(boolean status) {
 		this.status = status;
+	}
+
+	public boolean isDefault() {
+		return setDefault;
+	}
+
+	public void setDefault(boolean setDefault) {
+		this.setDefault = setDefault;
 	}
 
 }

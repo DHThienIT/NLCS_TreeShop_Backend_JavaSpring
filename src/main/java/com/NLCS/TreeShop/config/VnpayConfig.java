@@ -26,9 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 public class VnpayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_Returnurl = "http://localhost:8080/api/payment/returnFromVnpay";
-    public static String vnp_TmnCode = "PEUSIX7F";
-    public static String vnp_HashSecret = "SXBNCRNSRWNQFSYTKGVJOZTJRMMNQREV";
+    public static String vnp_Returnurl = "http://localhost:8090/api/payment/returnFromVnpay";
+    public static String vnp_TmnCode = "DRCDU2D8";
+    public static String vnp_HashSecret = "GCYXHFZCSCZWLACHVZUUVICGSRUHHCWK";
     public static String vnp_apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/merchant.html";
 
     public static String md5(String message) {

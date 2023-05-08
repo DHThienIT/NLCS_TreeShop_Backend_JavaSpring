@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,12 +18,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.NLCS.TreeShop.models.Tree;
 import com.NLCS.TreeShop.payload.request.TreeRequest;
 import com.NLCS.TreeShop.payload.response.MessageResponse;
 import com.NLCS.TreeShop.repository.TreeRepository;
+import com.NLCS.TreeShop.security.services.TreeSearchService;
 import com.NLCS.TreeShop.security.services.TreeService;
 
 //@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
@@ -34,13 +37,23 @@ public class TreeController {
 	TreeService treeService;
 	@Autowired
 	TreeRepository treeRepository;
+	@Autowired
+	TreeSearchService treeSearchService;
 
 	@GetMapping("/getAll")
-	public ResponseEntity<?> getAllTreeForShowHome() {
-		List<Tree> trees = treeService.getAllTreeForShowHome();
+	public ResponseEntity<?> getAllTreeForShowHome(@RequestParam Optional<Integer> page,
+			@RequestParam Optional<String> sortBy) {
+//		List<Tree> trees = treeService.getAllTreeForShowHome();
+		Page<Tree> trees = treeService.getAllTree(page, sortBy);
 		return ResponseEntity.ok(trees);
 	}
-	
+
+	@GetMapping("/getNumberOfTree")
+	public Integer getNumberOfTree() {
+		List<Tree> trees = treeService.getAllTreeForShowHome();
+		return trees.size();
+	}
+
 	@GetMapping("/getAllTrees")
 	@PreAuthorize("hasRole('TREE_HARD_ACCESS')")
 	public ResponseEntity<?> getAllTreeForManage() {
@@ -92,7 +105,7 @@ public class TreeController {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@PutMapping(value = "/reactivation/{treeId}", consumes = { "*/*" })
 	@PreAuthorize("hasRole('TREE_HARD_ACCESS')")
 	public ResponseEntity<?> treeReactivationById(@PathVariable("treeId") Long treeId) {

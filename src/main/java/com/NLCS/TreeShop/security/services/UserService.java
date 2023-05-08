@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.NLCS.TreeShop.models.User;
+import com.NLCS.TreeShop.payload.request.AvatarRequest;
 import com.NLCS.TreeShop.payload.request.PasswordRequest;
 import com.NLCS.TreeShop.payload.request.UserInformationRequest;
 
@@ -23,4 +24,6 @@ public interface UserService {
 	User updatePassword(Long userId, PasswordRequest passwordRequest);
 
 	User userReactivationById(Long userId);
+
+	User updateUserAvatar(Long userId, String avatarName);
 }

@@ -13,10 +13,10 @@ import javax.persistence.OneToMany;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class District {
+public class ProvinceAndCity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long districtId;
+    private Long provinceAndCityId;
 
     private String name;
 
@@ -24,28 +24,28 @@ public class District {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ward", orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 
-    public District() {
-    	super();
-    }
-
-    public District(String name) {
-    	super();
-        this.name = name;
-    }
+    public ProvinceAndCity() {
+		super();
+	}
     
-    public Long getDistrictId() {
-		return districtId;
+	public ProvinceAndCity(String name) {
+		super();
+		this.name = name;
 	}
 
-	public void setDistrictId(Long districtId) {
-		this.districtId = districtId;
+	public Long getProvinceAndCityId() {
+		return provinceAndCityId;
+	}
+
+	public void setProvinceAndCityId(Long provinceAndCityId) {
+		this.provinceAndCityId = provinceAndCityId;
 	}
 
 	public String getName() {
-        return name;
-    }
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 }

@@ -1,4 +1,4 @@
-package com.NLCS.TreeShop.security.services;
+package com.NLCS.TreeShop.security.servicesImpl;
 
 import java.util.List;
 
@@ -14,6 +14,7 @@ import com.NLCS.TreeShop.payload.request.CartRequest;
 import com.NLCS.TreeShop.repository.CartItemRepository;
 import com.NLCS.TreeShop.repository.TreeRepository;
 import com.NLCS.TreeShop.repository.UserRepository;
+import com.NLCS.TreeShop.security.services.CartItemService;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {

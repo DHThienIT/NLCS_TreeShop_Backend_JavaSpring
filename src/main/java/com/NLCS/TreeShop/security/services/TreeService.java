@@ -2,6 +2,7 @@ package com.NLCS.TreeShop.security.services;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -25,5 +26,6 @@ public interface TreeService {
 	Tree treeReactivationById(Long treeId);
 
 	Tree getTree(Long id);
-
+	
+	Page<Tree> getAllTree(Optional<Integer> page, Optional<String> sortBy);
 }

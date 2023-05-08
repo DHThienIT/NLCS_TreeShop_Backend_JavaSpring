@@ -3,7 +3,10 @@ package com.NLCS.TreeShop.models;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +18,8 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Tree {
@@ -41,6 +46,10 @@ public class Tree {
 	@NotNull
 	@Min(0)
 	private int price;
+	
+	@NotNull
+	@JsonIgnore
+	private boolean status;
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "tree_category", joinColumns = @JoinColumn(name = "tree_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
@@ -51,7 +60,12 @@ public class Tree {
 	private Supplier supplier;
 
 	@NotNull
-	private boolean status;
+	@Enumerated(EnumType.STRING)
+	@Column(length = 10)
+	private EColor color;
+	
+	@ManyToMany(mappedBy = "trees")
+	private Set<Promotion> promotions = new HashSet<>();
 
 	public Tree() {
 
@@ -60,7 +74,7 @@ public class Tree {
 	public Tree(@NotBlank(message = "Name is required") String treeName,
 			@NotBlank(message = "Description is required") String description,
 			@NotBlank(message = "Size is required") String size, @NotNull @Min(0) int stock, @NotNull @Min(0) int price,
-			Set<Category> categories, Supplier supplier) {
+			Set<Category> categories, Supplier supplier, EColor color) {
 		super();
 		this.treeName = treeName;
 		this.description = description;
@@ -71,6 +85,7 @@ public class Tree {
 		this.categories = categories;
 		this.supplier = supplier;
 		this.status = true;
+		this.color = color;
 	}
 
 	public Long getTreeId() {
@@ -143,6 +158,14 @@ public class Tree {
 
 	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
+	}
+
+	public EColor getColor() {
+		return color;
+	}
+
+	public void setColor(EColor color) {
+		this.color = color;
 	}
 
 	public boolean isStatus() {

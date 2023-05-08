@@ -47,7 +47,7 @@ public class SupplierController {
 	}
 
 	@PostMapping(value = "/create", consumes = { "*/*" })
-	@PreAuthorize("hasRole('SUPPLIER_NORMAL_ACCESS')")
+	@PreAuthorize("hasRole('SUPPLIER_HARD_ACCESS')")
 	public ResponseEntity<?> createSupplier(@Valid @RequestBody SupplierRequest supplierRequest) {
 		List<Supplier> suppliers = supplierService.getAll();
 		for (Supplier supplier : suppliers) {
@@ -59,7 +59,7 @@ public class SupplierController {
 	}
 
 	@PutMapping(value = "/{supplierId}", consumes = { "*/*" })
-	@PreAuthorize("hasRole('SUPPLIER_NORMAL_ACCESS')")
+	@PreAuthorize("hasRole('SUPPLIER_HARD_ACCESS')")
 	public ResponseEntity<?> updateSupplier(@PathVariable("supplierId") Long supplierId,
 			@RequestBody @Valid SupplierRequest supplierRequest) {
 		List<Supplier> suppliers = supplierService.getAll();
@@ -73,7 +73,7 @@ public class SupplierController {
 	}
 
 	@DeleteMapping(value = "/{supplierId}")
-	@PreAuthorize("hasRole('SUPPLIER_NORMAL_ACCESS')")
+	@PreAuthorize("hasRole('SUPPLIER_HARD_ACCESS')")
 	public ResponseEntity<MessageResponse> softDeleteSupplierById(@PathVariable("supplierId") Long supplierId) {
 		try {
 			supplierService.softDeleteSupplierById(supplierId);
@@ -95,7 +95,7 @@ public class SupplierController {
 	}
 
 	@PutMapping(value = "/reactivation/{supplierId}", consumes = { "*/*" })
-	@PreAuthorize("hasRole('SUPPLIER_NORMAL_ACCESS')")
+	@PreAuthorize("hasRole('CRUD_ALLOW_ALL')")
 	public ResponseEntity<?> supplierReactivationById(@PathVariable("supplierId") Long supplierId) {
 		return new ResponseEntity<>(supplierService.supplierReactivationById(supplierId), HttpStatus.CREATED);
 	}

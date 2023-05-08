@@ -12,14 +12,15 @@ public class UserInformationRequest {
 	@NotBlank
 	@Size(min = 2, max = 10)
 	private String lastname;
+	
+	@NotBlank
+	@Size(max = 13)
+	private String phone;
 
 	@NotBlank
 	@Size(max = 50)
 	@Email
 	private String email;
-
-	@NotBlank
-	private String userPhoto;
 
 	public String getFirstname() {
 		return firstname;
@@ -45,12 +46,11 @@ public class UserInformationRequest {
 		this.email = email;
 	}
 
-	public String getUserPhoto() {
-		return userPhoto;
+	public String getPhone() {
+		return phone;
 	}
 
-	public void setUserPhoto(String userPhoto) {
-		this.userPhoto = userPhoto;
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
-
 }

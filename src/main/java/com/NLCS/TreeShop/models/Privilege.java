@@ -10,17 +10,24 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Privilege {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@JsonIgnore
 	private Long privilegeId;
 
 	@NotNull
 	private String name;
 
 	@NotNull
+	@JsonIgnore
 	private String detail;
+	
+	@ManyToMany(mappedBy = "privileges")
+	private Set<Role> roles = new HashSet<>();
 
 	public Privilege() {
 		super();
@@ -54,7 +61,4 @@ public class Privilege {
 	public void setDetail(String detail) {
 		this.detail = detail;
 	}
-
-	@ManyToMany(mappedBy = "privileges")
-	private Set<Role> roles = new HashSet<>();
 }

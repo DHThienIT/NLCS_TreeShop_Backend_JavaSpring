@@ -2,9 +2,13 @@ package com.NLCS.TreeShop.payload.request;
 
 import java.util.Set;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import com.NLCS.TreeShop.models.EColor;
 
 public class TreeRequest {
 	@NotBlank(message = "Name is required")
@@ -32,6 +36,9 @@ public class TreeRequest {
 	
 	@NotNull
 	private Set<String> categories;
+	
+	@Enumerated(EnumType.STRING)
+	private EColor color;
 
 	public String getName() {
 		return name;
@@ -95,6 +102,14 @@ public class TreeRequest {
 
 	public void setCategories(Set<String> categories) {
 		this.categories = categories;
+	}
+
+	public EColor getColor() {
+		return color;
+	}
+
+	public void setColor(EColor color) {
+		this.color = color;
 	}
 
 	

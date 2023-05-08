@@ -14,52 +14,63 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Invoice {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long invoiceId;
-	
+
 	@JoinColumn(name = "user_id")
 	@ManyToOne()
 	private User user;
-	
+
 	@NotNull
 	private String timeCreate;
-	
+
 	@NotNull
 	private String paymentMethod;
-	
+
 	@NotNull
 	@Min(0)
 	private double totalPrice;
-	
+
+	@NotNull
+	private double shipmentFee;
+
+	@NotNull
+	private double promotionPrice;
+
 	@NotNull
 	private boolean wasPay;
-	
+
 	@NotNull
+	@JsonIgnore
 	private boolean status;
-	
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "invoice", orphanRemoval = true)
 	private List<CartItem> cartItems = new ArrayList<>();
-	
+
 	@JoinColumn(name = "address_id")
 	@ManyToOne
 	private Address address;
 
 	public Invoice() {
 	}
-	
+
 	public Invoice(User user, @NotNull String timeCreate, @NotNull String paymentMethod,
-			@NotNull @Min(0) double totalPrice, @NotNull boolean wasPay, List<CartItem> cartItems, Address address) {
+			@NotNull @Min(0) double totalPrice, @NotNull boolean wasPay, List<CartItem> cartItems, Address address,
+			@NotNull double shipmentFee, @NotNull double promotionPrice) {
 		super();
 		this.user = user;
 		this.timeCreate = timeCreate;
 		this.paymentMethod = paymentMethod;
 		this.totalPrice = totalPrice;
-		this.wasPay = wasPay;
 		this.cartItems = cartItems;
 		this.address = address;
+		this.shipmentFee = shipmentFee;
+		this.promotionPrice = promotionPrice;
 		this.wasPay = false;
 		this.status = true;
 		this.timeCreate = "Chưa thanh toán";
@@ -95,6 +106,22 @@ public class Invoice {
 
 	public void setTotalPrice(double totalPrice) {
 		this.totalPrice = totalPrice;
+	}
+
+	public double getShipmentFee() {
+		return shipmentFee;
+	}
+
+	public void setShipmentFee(double shipmentFee) {
+		this.shipmentFee = shipmentFee;
+	}
+
+	public double getPromotionPrice() {
+		return promotionPrice;
+	}
+
+	public void setPromotionPrice(double promotionPrice) {
+		this.promotionPrice = promotionPrice;
 	}
 
 	public boolean isWasPay() {

@@ -1,10 +1,12 @@
 package com.NLCS.TreeShop.controllers;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.NLCS.TreeShop.models.Category;
@@ -25,8 +28,8 @@ import com.NLCS.TreeShop.payload.response.MessageResponse;
 import com.NLCS.TreeShop.repository.CategoryRepository;
 import com.NLCS.TreeShop.security.services.CategoryService;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RequestMapping("/api/category")
 public class CategoryController {
 	@Autowired
@@ -45,6 +48,13 @@ public class CategoryController {
 		List<Tree> trees = categoryService.filterTreeByCategory(categoryId);
 		return ResponseEntity.ok(trees);
 	}
+	
+//	@GetMapping("/filterTree/{categoryId}")
+//	public Page<Tree> filterTree(@PathVariable("categoryId") Long categoryId,
+//			@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+//		Page<Tree> trees = categoryService.filterTreeByCategory(categoryId, page, sortBy);
+//		return trees;
+//	}
 
 	@PostMapping(value = "/create", consumes = { "*/*" })
 	@PreAuthorize("hasRole('CATEGORY_NORMAL_ACCESS')")
